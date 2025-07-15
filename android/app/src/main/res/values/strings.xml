@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">amfit-mobile-trainer</string>
+    <string name="title_activity_main">amfit-mobile-trainer</string>
+    <string name="package_name">com.amfit.trainer</string>
+    <string name="custom_url_scheme">com.amfit.trainer</string>
+</resources>

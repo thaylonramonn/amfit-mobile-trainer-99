@@ -1,0 +1,191 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* AM Fit Design System - Sophisticated & Modern
+All colors MUST be HSL for consistency and theming support.
+*/
+
+@layer base {
+  :root {
+    /* AM Fit Professional Black & White Design System */
+    --background: 0 0% 100%; /* Pure white */
+    --foreground: 0 0% 9%; /* Deep black (#171717) */
+    
+    /* Success Colors for AM Fit branding */
+    --amfit-brand-success: 142 76% 36%; /* Green success */
+    
+    /* Splash & Brand */
+    --splash-bg: 0 0% 0%; /* Pure black for dramatic impact */
+    --brand-primary: 0 0% 9%; /* Deep black primary */
+    --brand-secondary: 0 0% 15%; /* Dark gray secondary */
+    --brand-accent: 0 0% 85%; /* Light gray accent */
+    --brand-orange: 25 100% 55%; /* Orange for highlights only */
+    --brand-warning: 38 100% 50%; /* Orange warning */
+    
+    /* Button System - Black & White Primary */
+    --button-primary: 0 0% 9%; /* Deep black primary button */
+    --button-primary-hover: 0 0% 15%; /* Black hover */
+    --button-secondary: 0 0% 100%; /* White secondary button */
+    --button-secondary-hover: 0 0% 96%; /* White hover */
+    --button-text-on-dark: 0 0% 100%; /* White text on dark */
+    --button-text-on-light: 0 0% 9%; /* Black text on light */
+    --button-orange: 25 100% 55%; /* Orange accent only */
+    --button-orange-hover: 25 100% 50%; /* Orange hover */
+    
+    /* Typography Hierarchy - B&W Focus */
+    --text-primary: 0 0% 9%; /* Deep black primary */
+    --text-secondary: 0 0% 40%; /* Medium gray secondary */
+    --text-muted: 0 0% 60%; /* Light gray muted */
+    --text-white: 0 0% 100%; /* Pure white */
+
+    /* Modern Card System */
+    --card: 0 0% 100%; /* Pure white cards */
+    --card-foreground: 0 0% 13%; /* Dark text on cards */
+    --card-elevated: 0 0% 96%; /* Light gray elevated (#F5F5F5) */
+    --card-border: 0 0% 90%; /* Clean card borders */
+
+    /* Advanced UI Elements */
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 15% 8%;
+
+    --primary: 0 0% 9%; /* Deep black primary */
+    --primary-foreground: 0 0% 100%; /* White on black */
+
+    --secondary: 0 0% 96%; /* Light gray secondary */
+    --secondary-foreground: 0 0% 9%; /* Black on light */
+
+    --muted: 0 0% 96%; /* Light muted background */
+    --muted-foreground: 0 0% 40%; /* Medium gray text */
+
+    --accent: 25 100% 55%; /* Orange accent (minimal use) */
+    --accent-foreground: 0 0% 100%; /* White on orange */
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%; /* Light gray borders */
+    --input: 0 0% 96%; /* Light input backgrounds */
+    --ring: 0 0% 9%; /* Black focus rings */
+
+    /* Modern Shadows & Gradients */
+    --shadow-subtle: 0 1px 3px 0 hsl(0 0% 13% / 0.08), 0 1px 2px 0 hsl(0 0% 13% / 0.04);
+    --shadow-medium: 0 4px 6px -1px hsl(0 0% 13% / 0.1), 0 2px 4px -1px hsl(0 0% 13% / 0.06);
+    --shadow-large: 0 10px 15px -3px hsl(0 0% 13% / 0.1), 0 4px 6px -2px hsl(0 0% 13% / 0.05);
+    --shadow-glow: 0 0 20px hsl(246 73% 61% / 0.25);
+    --shadow-orange-glow: 0 0 25px hsl(25 100% 55% / 0.3);
+    --shadow-black: 0 4px 20px hsl(0 0% 0% / 0.25);
+
+    --gradient-primary: linear-gradient(135deg, hsl(0 0% 9%), hsl(0 0% 15%));
+    --gradient-secondary: linear-gradient(135deg, hsl(0 0% 100%), hsl(0 0% 96%));
+    --gradient-orange: linear-gradient(135deg, hsl(25 100% 55%), hsl(25 100% 60%));
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100%), hsl(0 0% 98%));
+    --gradient-brand: linear-gradient(135deg, hsl(0 0% 9%), hsl(0 0% 15%));
+    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 40%));
+    
+    /* Blur Effects */
+    --blur-subtle: blur(8px);
+    --blur-medium: blur(12px);
+    --blur-strong: blur(16px);
+
+    --radius: 0.75rem; /* Modern radius */
+
+    /* Animation & Transitions */
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --animation-duration: 300ms;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-inter antialiased;
+    transition: var(--transition-smooth);
+  }
+
+  /* Enhanced Typography */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bebas tracking-wide;
+  }
+
+  /* Smooth interactions */
+  button, a, [role="button"] {
+    transition: var(--transition-smooth);
+  }
+
+  /* Enhanced focus states */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+    transition: var(--transition-smooth);
+  }
+
+  /* Splash Screen Animation */
+  @keyframes fadeInSubtle {
+    0% {
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+}
