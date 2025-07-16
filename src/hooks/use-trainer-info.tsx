@@ -17,46 +17,64 @@ export const useTrainerInfo = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const user = auth.currentUser;
-    if (!user) {
-      setLoading(false);
-      setError('Usuário não autenticado');
-      return;
-    }
+    let unsubscribe: () => void;
 
-    console.log('🔍 Buscando dados do trainer:', user.uid);
-    
-    // Listener em tempo real para dados do trainer
-    const unsubscribe = onSnapshot(
-      doc(db, 'users', user.uid),
-      (doc) => {
-        if (doc.exists()) {
-          const data = doc.data();
-          console.log('✅ Dados do trainer encontrados:', data);
-          
-          setTrainerInfo({
-            id: doc.id,
-            name: data.name,
-            email: data.email,
-            trainerCode: data.trainerCode,
-            instagram: data.instagram,
-            createdAt: data.createdAt?.toDate() || new Date(),
-          });
-          setError(null);
-        } else {
-          console.log('❌ Dados do trainer não encontrados');
-          setError('Dados do trainer não encontrados');
+    const setupTrainerListener = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          console.log('❌ Usuário não autenticado no hook trainer');
+          setLoading(false);
+          setError('Usuário não autenticado');
+          return;
         }
-        setLoading(false);
-      },
-      (error) => {
-        console.error('❌ Erro ao buscar dados do trainer:', error);
-        setError('Erro ao carregar dados do trainer');
+
+        console.log('🔍 Buscando dados do trainer:', user.uid);
+        
+        // Listener em tempo real para dados do trainer
+        unsubscribe = onSnapshot(
+          doc(db, 'users', user.uid),
+          (docSnapshot) => {
+            if (docSnapshot.exists()) {
+              const data = docSnapshot.data();
+              console.log('✅ Dados do trainer encontrados:', data);
+              
+              setTrainerInfo({
+                id: docSnapshot.id,
+                name: data.name,
+                email: data.email,
+                trainerCode: data.trainerCode,
+                instagram: data.instagram,
+                createdAt: data.createdAt?.toDate() || new Date(),
+              });
+              setError(null);
+            } else {
+              console.log('❌ Documento do trainer não encontrado');
+              setError('Dados do trainer não encontrados');
+            }
+            setLoading(false);
+          },
+          (error) => {
+            console.error('❌ Erro ao buscar dados do trainer:', error);
+            setError('Erro ao carregar dados do trainer');
+            setLoading(false);
+          }
+        );
+      } catch (error) {
+        console.error('❌ Erro ao configurar listener do trainer:', error);
+        setError('Erro ao configurar busca do trainer');
         setLoading(false);
       }
-    );
+    };
 
-    return () => unsubscribe();
+    setupTrainerListener();
+
+    return () => {
+      if (unsubscribe) {
+        console.log('🧹 Limpando listener do trainer');
+        unsubscribe();
+      }
+    };
   }, []);
 
   return { trainerInfo, loading, error };

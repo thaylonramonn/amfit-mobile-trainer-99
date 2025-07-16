@@ -157,21 +157,27 @@ const TrainerDashboard = () => {
                       </div>
                       <div className="flex items-center justify-between mb-2">
                         <p className="text-lg sm:text-xl font-mono font-bold text-amfit-text-primary">
-                          {trainerLoading ? 'Carregando...' : (trainerInfo?.trainerCode || 'Erro ao carregar')}
+                          {trainerLoading ? (
+                            <span className="animate-pulse bg-gray-300 h-6 w-32 rounded"></span>
+                          ) : trainerInfo?.trainerCode ? (
+                            trainerInfo.trainerCode
+                          ) : (
+                            <span className="text-red-500 text-sm">Erro ao carregar código</span>
+                          )}
                         </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (trainerInfo?.trainerCode) {
+                        {trainerInfo?.trainerCode && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
                               navigator.clipboard.writeText(trainerInfo.trainerCode);
                               toast.success('Código copiado!');
-                            }
-                          }}
-                          className="h-8 px-2"
-                        >
-                          <Copy className="w-3 h-3" />
-                        </Button>
+                            }}
+                            className="h-8 px-2"
+                          >
+                            <Copy className="w-3 h-3" />
+                          </Button>
+                        )}
                       </div>
                       <p className="text-xs text-amfit-text-secondary">
                         Compartilhe este código com seus alunos para que eles possam se cadastrar
