@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Dumbbell, FileText, Home, Settings, LogOut, X, Plus, Users, Clock, CheckCircle, ClipboardList, UserCheck } from 'lucide-react';
+import { User, Dumbbell, FileText, Home, Settings, LogOut, X, Plus, Users, Clock, CheckCircle, ClipboardList, UserCheck, Copy } from 'lucide-react';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { toast } from 'sonner';
@@ -16,9 +16,13 @@ import { WorkoutScheduler } from '@/components/ui/workout-scheduler';
 import { NotificationPermission } from '@/components/ui/notification-permission';
 import { Exercise } from '@/data/exercises';
 import { ptBR } from 'date-fns/locale';
+import { useTrainerInfo } from '@/hooks/use-trainer-info';
+import { StudentSelector } from '@/components/ui/student-selector';
+import { Label } from '@/components/ui/label';
 
 const TrainerDashboard = () => {
   const navigate = useNavigate();
+  const { trainerInfo, loading: trainerLoading } = useTrainerInfo();
   const [activeTab, setActiveTab] = useState('home');
   const [showExerciseSelection, setShowExerciseSelection] = useState(false);
   const [workoutExercises, setWorkoutExercises] = useState<Array<{
@@ -151,7 +155,24 @@ const TrainerDashboard = () => {
                         <p className="text-sm font-semibold text-amfit-text-primary">Seu Código Personal</p>
                         <div className="w-2 h-2 bg-amfit-orange rounded-full animate-pulse" />
                       </div>
-                      <p className="text-lg sm:text-xl font-mono font-bold text-amfit-text-primary mb-2">PERS-2025-A1B2C3</p>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-lg sm:text-xl font-mono font-bold text-amfit-text-primary">
+                          {trainerLoading ? 'Carregando...' : (trainerInfo?.trainerCode || 'Erro ao carregar')}
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (trainerInfo?.trainerCode) {
+                              navigator.clipboard.writeText(trainerInfo.trainerCode);
+                              toast.success('Código copiado!');
+                            }
+                          }}
+                          className="h-8 px-2"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </Button>
+                      </div>
                       <p className="text-xs text-amfit-text-secondary">
                         Compartilhe este código com seus alunos para que eles possam se cadastrar
                       </p>
@@ -200,28 +221,33 @@ const TrainerDashboard = () => {
               <div className="space-y-4">
                 <Card className="bg-white border-0 shadow-medium">
                   <CardHeader>
-                    <CardTitle className="font-inter text-amfit-text-primary flex items-center">
-                      <Users className="w-5 h-5 mr-2 text-amfit-text-secondary" />
-                      Meus Alunos
+                    <CardTitle className="font-inter text-amfit-text-primary flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Users className="w-5 h-5 mr-2 text-amfit-text-secondary" />
+                        Meus Alunos
+                      </div>
+                      {trainerInfo?.trainerCode && (
+                        <div className="flex items-center space-x-2">
+                          <code className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">
+                            {trainerInfo.trainerCode}
+                          </code>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(trainerInfo.trainerCode);
+                              toast.success('Código copiado!');
+                            }}
+                            className="h-7 px-2"
+                          >
+                            <Copy className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      )}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="text-center py-8 text-amfit-text-secondary">
-                      <Users className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                      <p className="font-medium">Nenhum aluno cadastrado ainda</p>
-                      <p className="text-sm">Compartilhe seu código personal para que alunos se cadastrem</p>
-                      
-                      {/* Botão para adicionar aluno com cor laranja highlight */}
-                      <Button 
-                        variant="amfit-orange" 
-                        size="default" 
-                        className="mt-4"
-                        onClick={() => {/* TODO: Implementar adicionar aluno */}}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Adicionar Aluno
-                      </Button>
-                    </div>
+                  <CardContent>
+                    <StudentManagement />
                   </CardContent>
                 </Card>
               </div>
@@ -482,11 +508,16 @@ const TrainerDashboard = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Selecionar Aluno</label>
-                    <select className="w-full p-2 border rounded-lg">
-                      <option value="">Selecione um aluno</option>
-                      {/* Alunos virão do Firebase */}
-                    </select>
+                    <Label htmlFor="student-select" className="text-sm font-medium">
+                      Selecionar Aluno
+                    </Label>
+                    <StudentSelector
+                      onStudentSelect={(studentId) => {
+                        console.log('Aluno selecionado para avaliação:', studentId);
+                        // TODO: Implementar lógica de configuração automática
+                      }}
+                      placeholder="Escolha um aluno para criar avaliação"
+                    />
                   </div>
                   
                   <div>
@@ -581,11 +612,16 @@ const TrainerDashboard = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Selecionar Aluno</label>
-                    <select className="w-full p-2 border rounded-lg">
-                      <option value="">Selecione um aluno</option>
-                      {/* Alunos virão do Firebase */}
-                    </select>
+                    <Label htmlFor="student-select" className="text-sm font-medium">
+                      Selecionar Aluno
+                    </Label>
+                    <StudentSelector
+                      onStudentSelect={(studentId) => {
+                        console.log('Aluno selecionado para treino:', studentId);
+                        // TODO: Implementar lógica de configuração automática
+                      }}
+                      placeholder="Escolha um aluno para criar treino"
+                    />
                   </div>
 
                   <div>
