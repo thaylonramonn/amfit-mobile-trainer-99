@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { collection, query, where, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
 
 interface Notification {
   id: string;
@@ -18,12 +20,61 @@ interface Notification {
   comments?: string;
 }
 
-// Mock notifications - cleared example data for production
-const mockNotifications: Notification[] = [];
+// Função para criar notificação
+export const createNotification = async (
+  recipientId: string, 
+  type: Notification['type'], 
+  title: string, 
+  message: string,
+  studentName?: string
+) => {
+  try {
+    await addDoc(collection(db, 'notifications'), {
+      recipientId,
+      type,
+      title,
+      message,
+      studentName,
+      timestamp: serverTimestamp(),
+      read: false,
+      createdAt: new Date()
+    });
+    console.log('✅ Notificação criada:', { recipientId, type, title });
+  } catch (error) {
+    console.error('❌ Erro ao criar notificação:', error);
+  }
+};
 
 export const NotificationSystem = () => {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+
+  // Buscar notificações do usuário atual
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const notificationsQuery = query(
+      collection(db, 'notifications'),
+      where('recipientId', '==', user.uid)
+    );
+
+    const unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
+      const notificationsList = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        timestamp: doc.data().timestamp?.toDate() || new Date()
+      })) as Notification[];
+      
+      // Ordenar por data mais recente
+      notificationsList.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      
+      console.log('🔔 Notificações carregadas:', notificationsList.length);
+      setNotifications(notificationsList);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

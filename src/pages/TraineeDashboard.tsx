@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Play, Activity, Target, Calendar, User, Settings, LogOut, Weight, Home, Plus } from 'lucide-react';
+import { Play, Activity, Target, Calendar, User, Settings, LogOut, Weight, Home, Plus, Copy } from 'lucide-react';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { toast } from 'sonner';
@@ -11,10 +11,13 @@ import { UserMenu } from '@/components/ui/user-menu';
 import { BackButton } from '@/components/ui/back-button';
 import { NotificationPermission } from '@/components/ui/notification-permission';
 import { EvaluationForm, EvaluationData } from '@/components/ui/evaluation-form';
+import { useTraineeInfo } from '@/hooks/use-trainee-info';
+import { Badge } from '@/components/ui/badge';
 
 const TraineeDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('home');
+  const { traineeInfo, loading } = useTraineeInfo();
   
   const [evaluations, setEvaluations] = useState<EvaluationData[]>([]);
 
@@ -53,6 +56,22 @@ const TraineeDashboard = () => {
               <div className="bg-white/10 px-2 py-1 rounded-lg backdrop-blur-sm">
                 <span className="text-xs sm:text-sm font-medium">Aluno</span>
               </div>
+              {traineeInfo?.trainerCode && (
+                <Badge variant="secondary" className="bg-white/20 text-white border-white/30 text-xs">
+                  Código: {traineeInfo.trainerCode}
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="ml-2 h-4 w-4 p-0 hover:bg-white/20"
+                    onClick={() => {
+                      navigator.clipboard.writeText(traineeInfo.trainerCode);
+                      toast.success('Código copiado!');
+                    }}
+                  >
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </Badge>
+              )}
               <span className="text-lg">💪</span>
             </div>
           </div>

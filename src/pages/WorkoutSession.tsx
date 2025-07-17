@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -67,6 +67,16 @@ const WorkoutSession = () => {
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [completedSets, setCompletedSets] = useState<number[]>([]);
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [startTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Atualizar tempo a cada minuto
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const currentExercise = mockWorkout.exercises[currentExerciseIndex];
   const progress = ((currentExerciseIndex + 1) / mockWorkout.exercises.length) * 100;
@@ -89,9 +99,21 @@ const WorkoutSession = () => {
   };
 
   const handleWorkoutComplete = (comments: string, rating: number) => {
-    // TODO: Save to Firebase and notify trainer
-    toast.success('Treino concluído com sucesso!');
+    toast.success('Treino concluído com sucesso! 🎉');
     setTimeout(() => navigate('/trainee-dashboard'), 1500);
+  };
+
+  const getTotalTime = () => {
+    const diffMs = currentTime.getTime() - startTime.getTime();
+    return Math.floor(diffMs / (1000 * 60)); // em minutos
+  };
+
+  const getWeekProgress = () => {
+    // Mock data - em produção viria do Firebase
+    return {
+      current: 2,
+      total: 5
+    };
   };
 
   return (
@@ -201,6 +223,13 @@ const WorkoutSession = () => {
         open={showCompletionDialog}
         onOpenChange={setShowCompletionDialog}
         onSubmit={handleWorkoutComplete}
+        exercises={mockWorkout.exercises.map(ex => ({
+          name: ex.name,
+          sets: ex.sets,
+          reps: ex.reps
+        }))}
+        totalTime={getTotalTime()}
+        weekProgress={getWeekProgress()}
       />
     </div>
   );

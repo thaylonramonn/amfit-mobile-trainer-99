@@ -2,70 +2,63 @@ import { useState, useEffect } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 
-interface TrainerInfo {
+interface TraineeInfo {
   id: string;
   name: string;
   email: string;
   trainerCode: string;
-  instagram?: string;
+  goal: string;
   createdAt: Date;
 }
 
-export const useTrainerInfo = () => {
-  const [trainerInfo, setTrainerInfo] = useState<TrainerInfo | null>(null);
+export const useTraineeInfo = () => {
+  const [traineeInfo, setTraineeInfo] = useState<TraineeInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let unsubscribe: () => void;
 
-    const setupTrainerListener = () => {
+    const setupTraineeListener = () => {
       const user = auth.currentUser;
       if (!user) {
-        console.log('❌ Usuário não autenticado no hook trainer');
+        console.log('❌ Usuário não autenticado no hook trainee');
         setLoading(false);
         setError('Usuário não autenticado');
         return;
       }
 
-      console.log('🔍 Buscando dados do trainer:', user.uid);
+      console.log('🔍 Buscando dados do trainee:', user.uid);
       
-      // Listener em tempo real para dados do trainer
+      // Listener em tempo real para dados do trainee
       unsubscribe = onSnapshot(
         doc(db, 'users', user.uid),
         (docSnapshot) => {
-          console.log('📊 Snapshot recebido:', { exists: docSnapshot.exists(), id: docSnapshot.id });
+          console.log('📊 Snapshot trainee recebido:', { exists: docSnapshot.exists(), id: docSnapshot.id });
           
           if (docSnapshot.exists()) {
             const data = docSnapshot.data();
-            console.log('✅ Dados completos do trainer:', data);
+            console.log('✅ Dados completos do trainee:', data);
             
-            if (!data.trainerCode) {
-              console.log('⚠️ TrainerCode não encontrado nos dados');
-              setError('Código do trainer não encontrado');
-              setLoading(false);
-              return;
-            }
-            
-            setTrainerInfo({
+            setTraineeInfo({
               id: docSnapshot.id,
               name: data.name,
               email: data.email,
               trainerCode: data.trainerCode,
-              instagram: data.instagram,
+              goal: data.goal,
               createdAt: data.createdAt?.toDate() || new Date(),
             });
             setError(null);
-            console.log('✅ TrainerInfo configurado:', data.trainerCode);
+            console.log('✅ TraineeInfo configurado');
           } else {
-            console.log('❌ Documento do trainer não encontrado');
-            setError('Dados do trainer não encontrados');
+            console.log('❌ Documento do trainee não encontrado');
+            setError('Dados do trainee não encontrados');
           }
           setLoading(false);
         },
         (error) => {
-          console.error('❌ Erro ao buscar dados do trainer:', error);
-          setError('Erro ao carregar dados do trainer');
+          console.error('❌ Erro ao buscar dados do trainee:', error);
+          setError('Erro ao carregar dados do trainee');
           setLoading(false);
         }
       );
@@ -74,7 +67,7 @@ export const useTrainerInfo = () => {
     // Aguardar autenticação
     const authUnsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        setupTrainerListener();
+        setupTraineeListener();
       } else {
         setLoading(false);
         setError('Usuário não autenticado');
@@ -83,12 +76,12 @@ export const useTrainerInfo = () => {
 
     return () => {
       if (unsubscribe) {
-        console.log('🧹 Limpando listener do trainer');
+        console.log('🧹 Limpando listener do trainee');
         unsubscribe();
       }
       authUnsubscribe();
     };
   }, []);
 
-  return { trainerInfo, loading, error };
+  return { traineeInfo, loading, error };
 };

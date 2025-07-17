@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { collection, query, where, onSnapshot, doc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -23,14 +25,47 @@ interface WorkoutSchedulerProps {
   onScheduleWorkout: (studentId: string, date: Date, time: string) => void;
 }
 
-// Mock students - cleared for production
-const mockStudents = [];
-
 export const WorkoutScheduler = ({ workoutExercises, onScheduleWorkout }: WorkoutSchedulerProps) => {
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [students, setStudents] = useState<any[]>([]);
+
+  // Buscar estudantes do trainer atual
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // Primeiro buscar o trainerCode do usuário atual
+    const userDocRef = doc(db, 'users', user.uid);
+    const unsubscribeUser = onSnapshot(userDocRef, (userDoc) => {
+      if (userDoc.exists()) {
+        const trainerCode = userDoc.data().trainerCode;
+        if (trainerCode) {
+          // Buscar estudantes com esse trainerCode
+          const studentsQuery = query(
+            collection(db, 'users'),
+            where('trainerCode', '==', trainerCode),
+            where('userType', '==', 'trainee')
+          );
+          
+          const unsubscribeStudents = onSnapshot(studentsQuery, (snapshot) => {
+            const studentsList = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            }));
+            console.log('🎯 Estudantes encontrados para scheduler:', studentsList);
+            setStudents(studentsList);
+          });
+
+          return () => unsubscribeStudents();
+        }
+      }
+    });
+
+    return () => unsubscribeUser();
+  }, []);
 
   const handleSchedule = () => {
     if (!selectedStudent || !selectedDate || !selectedTime || workoutExercises.length === 0) {
@@ -78,7 +113,7 @@ export const WorkoutScheduler = ({ workoutExercises, onScheduleWorkout }: Workou
                 <SelectValue placeholder="Escolha o aluno" />
               </SelectTrigger>
               <SelectContent>
-                {mockStudents.map((student) => (
+                {students.map((student) => (
                   <SelectItem key={student.id} value={student.id}>
                     <div className="flex items-center">
                       <Users className="w-4 h-4 mr-2" />
@@ -86,6 +121,11 @@ export const WorkoutScheduler = ({ workoutExercises, onScheduleWorkout }: Workou
                     </div>
                   </SelectItem>
                 ))}
+                {students.length === 0 && (
+                  <div className="p-2 text-center text-amfit-text-secondary text-sm">
+                    Nenhum aluno encontrado
+                  </div>
+                )}
               </SelectContent>
             </Select>
           </div>
