@@ -30,6 +30,8 @@ const TrainerDashboard = () => {
     sets: number;
     reps: string;
   }>>([]);
+  const [selectedStudentForWorkout, setSelectedStudentForWorkout] = useState('');
+  const [selectedStudentForAssessment, setSelectedStudentForAssessment] = useState('');
 
   const handleLogout = async () => {
     try {
@@ -519,9 +521,10 @@ const TrainerDashboard = () => {
                     </Label>
                     <StudentSelector
                       onStudentSelect={(studentId) => {
+                        setSelectedStudentForAssessment(studentId);
                         console.log('Aluno selecionado para avaliação:', studentId);
-                        // TODO: Implementar lógica de configuração automática
                       }}
+                      selectedStudent={selectedStudentForAssessment}
                       placeholder="Escolha um aluno para criar avaliação"
                     />
                   </div>
@@ -623,9 +626,10 @@ const TrainerDashboard = () => {
                     </Label>
                     <StudentSelector
                       onStudentSelect={(studentId) => {
+                        setSelectedStudentForWorkout(studentId);
                         console.log('Aluno selecionado para treino:', studentId);
-                        // TODO: Implementar lógica de configuração automática
                       }}
+                      selectedStudent={selectedStudentForWorkout}
                       placeholder="Escolha um aluno para criar treino"
                     />
                   </div>
@@ -703,6 +707,7 @@ const TrainerDashboard = () => {
                   <WorkoutScheduler 
                     workoutExercises={workoutExercises}
                     onScheduleWorkout={handleScheduleWorkout}
+                    preSelectedStudent={selectedStudentForWorkout}
                   />
                 </CardContent>
               </Card>

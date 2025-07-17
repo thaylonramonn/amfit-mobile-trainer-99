@@ -23,14 +23,22 @@ interface WorkoutSchedulerProps {
     reps: string;
   }>;
   onScheduleWorkout: (studentId: string, date: Date, time: string) => void;
+  preSelectedStudent?: string;
 }
 
-export const WorkoutScheduler = ({ workoutExercises, onScheduleWorkout }: WorkoutSchedulerProps) => {
+export const WorkoutScheduler = ({ workoutExercises, onScheduleWorkout, preSelectedStudent }: WorkoutSchedulerProps) => {
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState('');
-  const [selectedStudent, setSelectedStudent] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState(preSelectedStudent || '');
   const [isOpen, setIsOpen] = useState(false);
   const [students, setStudents] = useState<any[]>([]);
+
+  // Update selected student when preSelectedStudent changes
+  useEffect(() => {
+    if (preSelectedStudent) {
+      setSelectedStudent(preSelectedStudent);
+    }
+  }, [preSelectedStudent]);
 
   // Buscar estudantes do trainer atual
   useEffect(() => {
@@ -105,30 +113,41 @@ export const WorkoutScheduler = ({ workoutExercises, onScheduleWorkout }: Workou
         </DialogHeader>
         
         <div className="space-y-6">
-          {/* Student Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="student">Selecionar Aluno *</Label>
-            <Select value={selectedStudent} onValueChange={setSelectedStudent}>
-              <SelectTrigger>
-                <SelectValue placeholder="Escolha o aluno" />
-              </SelectTrigger>
-              <SelectContent>
-                {students.map((student) => (
-                  <SelectItem key={student.id} value={student.id}>
-                    <div className="flex items-center">
-                      <Users className="w-4 h-4 mr-2" />
-                      {student.name}
+          {/* Student Selection - Only show if no pre-selected student */}
+          {!preSelectedStudent && (
+            <div className="space-y-2">
+              <Label htmlFor="student">Selecionar Aluno *</Label>
+              <Select value={selectedStudent} onValueChange={setSelectedStudent}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Escolha o aluno" />
+                </SelectTrigger>
+                <SelectContent>
+                  {students.map((student) => (
+                    <SelectItem key={student.id} value={student.id}>
+                      <div className="flex items-center">
+                        <Users className="w-4 h-4 mr-2" />
+                        {student.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                  {students.length === 0 && (
+                    <div className="p-2 text-center text-amfit-text-secondary text-sm">
+                      Nenhum aluno encontrado
                     </div>
-                  </SelectItem>
-                ))}
-                {students.length === 0 && (
-                  <div className="p-2 text-center text-amfit-text-secondary text-sm">
-                    Nenhum aluno encontrado
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
-          </div>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Show selected student info if pre-selected */}
+          {preSelectedStudent && (
+            <div className="bg-amfit-button/10 p-3 rounded-lg">
+              <p className="text-sm font-medium">
+                Aluno selecionado: {students.find(s => s.id === preSelectedStudent)?.name || 'Carregando...'}
+              </p>
+            </div>
+          )}
 
           {/* Date Selection */}
           <div className="space-y-2">

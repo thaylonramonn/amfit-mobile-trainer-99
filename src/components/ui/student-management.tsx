@@ -325,7 +325,18 @@ export const StudentManagement = () => {
                   </Dialog>
                   
                   {student.status === 'pending_setup' && (
-                    <Button variant="amfit" size="sm">
+                    <Button 
+                      variant="amfit" 
+                      size="sm"
+                      onClick={() => {
+                        // TODO: Implement configuration logic
+                        console.log('Configurar aluno:', student.name);
+                        toast({
+                          title: "Configuração",
+                          description: `Configuração para ${student.name} será implementada`,
+                        });
+                      }}
+                    >
                       Configurar
                     </Button>
                   )}
