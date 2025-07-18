@@ -224,7 +224,7 @@ export const WorkoutScheduler = ({ workoutExercises, onScheduleWorkout, preSelec
             </Button>
             <Button 
               onClick={handleSchedule} 
-              className="flex-1 bg-amfit-button hover:bg-amfit-button/90"
+              className="flex-1 bg-black hover:bg-black/90 text-white"
             >
               Agendar Treino
             </Button>

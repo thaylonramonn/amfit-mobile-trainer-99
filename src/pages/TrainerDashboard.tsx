@@ -18,11 +18,14 @@ import { Exercise } from '@/data/exercises';
 import { ptBR } from 'date-fns/locale';
 import { useTrainerInfo } from '@/hooks/use-trainer-info';
 import { StudentSelector } from '@/components/ui/student-selector';
+import { EvaluationForm } from '@/components/ui/evaluation-form';
+import { useEvaluations } from '@/hooks/use-evaluations';
 import { Label } from '@/components/ui/label';
 
 const TrainerDashboard = () => {
   const navigate = useNavigate();
   const { trainerInfo, loading: trainerLoading } = useTrainerInfo();
+  const { evaluations, loading: evaluationsLoading, addEvaluation } = useEvaluations();
   const [activeTab, setActiveTab] = useState('home');
   const [showExerciseSelection, setShowExerciseSelection] = useState(false);
   const [workoutExercises, setWorkoutExercises] = useState<Array<{
@@ -147,7 +150,7 @@ const TrainerDashboard = () => {
                       
                       <div className="bg-white border border-amfit-border p-3 sm:p-4 rounded-xl text-center">
                         <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 sm:mb-3 text-amfit-text-secondary" />
-                        <h3 className="font-bold text-xl sm:text-2xl text-amfit-text-primary">0</h3>
+                        <h3 className="font-bold text-xl sm:text-2xl text-amfit-text-primary">{evaluations.length}</h3>
                         <p className="text-xs sm:text-sm text-amfit-text-secondary font-medium">Avaliações</p>
                       </div>
                     </div>
@@ -499,119 +502,110 @@ const TrainerDashboard = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="text-center py-8 text-gray-500">
-                      <FileText className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                      <p>Nenhuma avaliação registrada</p>
-                      <p className="text-sm">Crie uma nova avaliação para começar</p>
-                    </div>
+                    {evaluationsLoading ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amfit-primary mx-auto mb-2"></div>
+                        <p className="text-sm text-muted-foreground">Carregando avaliações...</p>
+                      </div>
+                    ) : evaluations.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <FileText className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                        <p>Nenhuma avaliação registrada</p>
+                        <p className="text-sm">Crie uma nova avaliação para começar</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {evaluations.map((evaluation) => (
+                          <div key={evaluation.id} className="border rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="font-semibold text-amfit-text-primary">
+                                Avaliação - {evaluation.createdAt.toLocaleDateString('pt-BR')}
+                              </h3>
+                              <span className="text-xs bg-amfit-primary/10 text-amfit-primary px-2 py-1 rounded">
+                                {evaluation.protocol || 'Completa'}
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 text-sm">
+                              <div>
+                                <p className="text-gray-600">Peso</p>
+                                <p className="font-bold">{evaluation.weight}kg</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-600">Altura</p>
+                                <p className="font-bold">{evaluation.height}cm</p>
+                              </div>
+                              {evaluation.bodyFat && (
+                                <div>
+                                  <p className="text-gray-600">% Gordura</p>
+                                  <p className="font-bold">{evaluation.bodyFat}%</p>
+                                </div>
+                              )}
+                            </div>
+                            {evaluation.notes && (
+                              <div className="mt-3 pt-3 border-t">
+                                <p className="text-xs text-gray-600 mb-1">Observações:</p>
+                                <p className="text-sm text-gray-700">{evaluation.notes}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
             )}
 
             {activeTab === 'newEvaluation' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-montserrat">📝 Nova Avaliação Corporal</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="student-select" className="text-sm font-medium">
-                      Selecionar Aluno
-                    </Label>
-                    <StudentSelector
-                      onStudentSelect={(studentId) => {
-                        setSelectedStudentForAssessment(studentId);
-                        console.log('Aluno selecionado para avaliação:', studentId);
-                      }}
-                      selectedStudent={selectedStudentForAssessment}
-                      placeholder="Escolha um aluno para criar avaliação"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Data da Avaliação</label>
-                    <input type="date" className="w-full p-2 border rounded-lg" />
-                  </div>
+              <div className="space-y-4">
+                <EvaluationForm
+                  onSubmit={async (data) => {
+                    try {
+                      if (!selectedStudentForAssessment) {
+                        toast.error('Selecione um aluno antes de salvar a avaliação');
+                        return;
+                      }
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Anamnese</label>
-                    <textarea 
-                      className="w-full p-2 border rounded-lg h-24" 
-                      placeholder="Histórico médico, objetivos, limitações..."
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Peso (kg)</label>
-                      <input type="number" className="w-full p-2 border rounded-lg" placeholder="75.5" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Altura (cm)</label>
-                      <input type="number" className="w-full p-2 border rounded-lg" placeholder="175" />
-                    </div>
-                  </div>
+                      console.log('💾 Salvando avaliação:', data);
+                      
+                      // Salvar avaliação no Firebase usando o hook
+                      await addEvaluation(data, selectedStudentForAssessment);
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Medidas Corporais</label>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Abdômen (cm)</label>
-                        <input type="number" className="w-full p-2 border rounded-lg" placeholder="90" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Braço Direito (cm)</label>
-                        <input type="number" className="w-full p-2 border rounded-lg" placeholder="35" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Coxa Direita (cm)</label>
-                        <input type="number" className="w-full p-2 border rounded-lg" placeholder="60" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Peitoral (cm)</label>
-                        <input type="number" className="w-full p-2 border rounded-lg" placeholder="100" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">% Gordura</label>
-                      <input type="number" className="w-full p-2 border rounded-lg" placeholder="15" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Massa Muscular (kg)</label>
-                      <input type="number" className="w-full p-2 border rounded-lg" placeholder="65" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Foto do Aluno</label>
-                    <input type="file" accept="image/*" className="w-full p-2 border rounded-lg" />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Observações</label>
-                    <textarea 
-                      className="w-full p-2 border rounded-lg h-24" 
-                      placeholder="Observações sobre a condição física, evolução, recomendações..."
-                    />
-                  </div>
-
-                  <Button 
-                    variant="amfit" 
-                    size="amfit" 
-                    className="w-full"
-                    onClick={() => {
-                      toast.success('Avaliação salva com sucesso!');
+                      toast.success('Avaliação criada com sucesso!');
+                      
+                      // Enviar notificação para o aluno
+                      // TODO: Implementar notificação via Firebase
+                      
+                      setSelectedStudentForAssessment('');
                       setTimeout(() => setActiveTab('evaluation'), 1500);
-                    }}
-                  >
-                    Salvar Avaliação
-                  </Button>
-                </CardContent>
-              </Card>
+                      
+                    } catch (error) {
+                      console.error('Erro ao salvar avaliação:', error);
+                      toast.error('Erro ao salvar avaliação');
+                    }
+                  }}
+                  onCancel={() => {
+                    setSelectedStudentForAssessment('');
+                    setActiveTab('evaluation');
+                  }}
+                />
+                
+                {!selectedStudentForAssessment && (
+                  <Card className="bg-amber-50 border-amber-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 bg-amber-400 rounded-full flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium text-amber-800">Aluno não selecionado</p>
+                          <p className="text-xs text-amber-600">
+                            Selecione um aluno na tela principal antes de criar a avaliação
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             )}
 
             {activeTab === 'workout' && (
