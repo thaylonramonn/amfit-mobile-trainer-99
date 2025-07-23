@@ -18,7 +18,7 @@ import { Exercise } from '@/data/exercises';
 import { ptBR } from 'date-fns/locale';
 import { useTrainerInfo } from '@/hooks/use-trainer-info';
 import { StudentSelector } from '@/components/ui/student-selector';
-import { EvaluationForm } from '@/components/ui/evaluation-form';
+import { ComprehensiveEvaluationForm } from '@/components/ui/comprehensive-evaluation-form';
 import { useEvaluations } from '@/hooks/use-evaluations';
 import { Label } from '@/components/ui/label';
 
@@ -558,53 +558,22 @@ const TrainerDashboard = () => {
 
             {activeTab === 'newEvaluation' && (
               <div className="space-y-4">
-                <EvaluationForm
+                <ComprehensiveEvaluationForm
                   onSubmit={async (data) => {
                     try {
-                      if (!selectedStudentForAssessment) {
-                        toast.error('Selecione um aluno antes de salvar a avaliação');
-                        return;
-                      }
-
-                      console.log('💾 Salvando avaliação:', data);
-                      
-                      // Salvar avaliação no Firebase usando o hook
-                      await addEvaluation(data, selectedStudentForAssessment);
-
+                      console.log('💾 Avaliação criada com sucesso!');
                       toast.success('Avaliação criada com sucesso!');
-                      
-                      // Enviar notificação para o aluno
-                      // TODO: Implementar notificação via Firebase
-                      
-                      setSelectedStudentForAssessment('');
-                      setTimeout(() => setActiveTab('evaluation'), 1500);
-                      
+                      setActiveTab('evaluation');
                     } catch (error) {
                       console.error('Erro ao salvar avaliação:', error);
                       toast.error('Erro ao salvar avaliação');
                     }
                   }}
                   onCancel={() => {
-                    setSelectedStudentForAssessment('');
                     setActiveTab('evaluation');
                   }}
                 />
                 
-                {!selectedStudentForAssessment && (
-                  <Card className="bg-amber-50 border-amber-200">
-                    <CardContent className="p-4">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 bg-amber-400 rounded-full flex-shrink-0" />
-                        <div>
-                          <p className="text-sm font-medium text-amber-800">Aluno não selecionado</p>
-                          <p className="text-xs text-amber-600">
-                            Selecione um aluno na tela principal antes de criar a avaliação
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
               </div>
             )}
 

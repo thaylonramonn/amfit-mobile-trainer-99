@@ -222,10 +222,11 @@ export const WorkoutScheduler = ({ workoutExercises, onScheduleWorkout, preSelec
             <Button variant="outline" onClick={() => setIsOpen(false)} className="flex-1">
               Cancelar
             </Button>
-            <Button 
-              onClick={handleSchedule} 
-              className="flex-1 bg-black hover:bg-black/90 text-white"
-            >
+        <Button 
+          onClick={handleSchedule} 
+          className="flex-1 bg-black hover:bg-black/90 text-white"
+          disabled={!selectedStudent || !selectedDate || !selectedTime}
+        >
               Agendar Treino
             </Button>
           </div>
