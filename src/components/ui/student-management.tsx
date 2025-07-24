@@ -9,11 +9,13 @@ import { Search, User, Dumbbell, FileText, Star, MessageSquare } from 'lucide-re
 import { collection, query, where, getDocs, doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { StudentConfigurationDialog } from './student-configuration-dialog';
 
 interface Student {
   id: string;
   name: string;
   email: string;
+  objective: string;
   status: 'active' | 'inactive' | 'pending_setup';
   lastWorkout?: Date;
   workoutRating?: number;
@@ -21,6 +23,7 @@ interface Student {
   joinDate: Date;
   goal: string;
   birthdate?: string;
+  gender?: string;
   trainerCode: string;
   workoutConfigured: boolean;
   assessmentConfigured: boolean;
@@ -30,6 +33,8 @@ export const StudentManagement = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [configStudent, setConfigStudent] = useState<Student | null>(null);
+  const [showConfigDialog, setShowConfigDialog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [trainerCode, setTrainerCode] = useState<string>('');
   const { toast } = useToast();
@@ -77,7 +82,9 @@ export const StudentManagement = () => {
                   name: data.name,
                   email: data.email,
                   goal: data.goal,
+                  objective: data.objective || data.goal,
                   birthdate: data.birthdate,
+                  gender: data.gender,
                   trainerCode: data.trainerCode,
                   workoutConfigured: data.workoutConfigured || false,
                   assessmentConfigured: data.assessmentConfigured || false,
@@ -206,18 +213,18 @@ export const StudentManagement = () => {
       <div className="space-y-3">
         {filteredStudents.map((student) => (
           <Card key={student.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <h3 className="font-medium">{student.name}</h3>
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                    <h3 className="font-medium text-base truncate">{student.name}</h3>
                     {getStatusBadge(student.status)}
                   </div>
-                  <p className="text-sm text-amfit-text-secondary mb-1">
-                    {student.email}
+                  <p className="text-sm text-amfit-text-secondary mb-1 truncate">
+                    {student.email || 'Sem e-mail'}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    Objetivo: {student.goal} • Cadastrado {formatDate(student.joinDate)}
+                  <p className="text-xs text-gray-500 truncate">
+                    Objetivo: {student.goal || student.objective} • Cadastrado {formatDate(student.joinDate)}
                   </p>
                   
                   {student.lastWorkout && (
@@ -235,13 +242,14 @@ export const StudentManagement = () => {
                   )}
                 </div>
                 
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button 
                         variant="outline" 
                         size="sm"
                         onClick={() => setSelectedStudent(student)}
+                        className="w-full sm:w-auto text-xs"
                       >
                         Ver Perfil
                       </Button>
@@ -324,22 +332,17 @@ export const StudentManagement = () => {
                     </DialogContent>
                   </Dialog>
                   
-                  {student.status === 'pending_setup' && (
-                    <Button 
-                      variant="amfit" 
-                      size="sm"
-                      onClick={() => {
-                        // TODO: Implement configuration logic
-                        console.log('Configurar aluno:', student.name);
-                        toast({
-                          title: "Configuração",
-                          description: `Configuração para ${student.name} será implementada`,
-                        });
-                      }}
-                    >
-                      Configurar
-                    </Button>
-                  )}
+                  <Button 
+                    variant="amfit" 
+                    size="sm"
+                    onClick={() => {
+                      setConfigStudent(student);
+                      setShowConfigDialog(true);
+                    }}
+                    className="w-full sm:w-auto text-xs"
+                  >
+                    Configurar
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -387,6 +390,44 @@ export const StudentManagement = () => {
           )}
         </div>
       ) : null}
+
+      <StudentConfigurationDialog
+        student={configStudent}
+        open={showConfigDialog}
+        onOpenChange={setShowConfigDialog}
+        onCreateWorkout={() => {
+          // TODO: Implementar criação de treino
+          toast({
+            title: "Criar Treino",
+            description: "Funcionalidade de criação de treino será implementada",
+          });
+        }}
+        onCreateAssessment={() => {
+          // TODO: Implementar criação de avaliação
+          toast({
+            title: "Criar Avaliação", 
+            description: "Funcionalidade de criação de avaliação será implementada",
+          });
+        }}
+        onEditWorkout={() => {
+          // TODO: Implementar edição de treino
+          toast({
+            title: "Editar Treino",
+            description: "Funcionalidade de edição de treino será implementada",
+          });
+        }}
+        onEditAssessment={() => {
+          // TODO: Implementar edição de avaliação
+          toast({
+            title: "Editar Avaliação",
+            description: "Funcionalidade de edição de avaliação será implementada", 
+          });
+        }}
+        onStudentUpdated={() => {
+          // Força atualização da lista
+          console.log('Aluno atualizado, forçando refresh...');
+        }}
+      />
     </div>
   );
 };

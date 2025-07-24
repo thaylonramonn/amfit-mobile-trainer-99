@@ -128,7 +128,7 @@ export const ComprehensiveEvaluationForm = ({ onSubmit, onCancel }: Comprehensiv
     { title: 'Anamnese', icon: FileText },
     { title: 'Objetivos', icon: FileText },
     { title: 'PAR-Q', icon: FileText },
-    { title: 'Medidas Básicas', icon: Calculator },
+    { title: 'Medidas', icon: Calculator },
     { title: 'Perímetros', icon: Calculator },
     { title: 'Dobras/Bio', icon: Calculator },
     { title: 'Finalizar', icon: FileText }
@@ -859,27 +859,29 @@ export const ComprehensiveEvaluationForm = ({ onSubmit, onCancel }: Comprehensiv
         </div>
         <Progress value={((currentStep + 1) / steps.length) * 100} className="h-2" />
         
-        {/* Steps Navigation */}
-        <div className="flex items-center justify-between mt-4 text-xs">
-          {steps.map((step, index) => {
-            const StepIcon = step.icon;
-            return (
-              <div 
-                key={index} 
-                className={`flex flex-col items-center space-y-1 ${
-                  index <= currentStep ? 'text-amfit-button' : 'text-gray-400'
-                }`}
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  index <= currentStep ? 'bg-amfit-button text-white' : 'bg-gray-200'
-                }`}>
-                  <StepIcon className="w-4 h-4" />
-                </div>
-                <span className="text-center">{step.title}</span>
-              </div>
-            );
-          })}
-        </div>
+         {/* Steps Navigation */}
+         <div className="flex items-center justify-between mt-4 text-xs">
+           {steps.map((step, index) => {
+             const StepIcon = step.icon;
+             return (
+               <div 
+                 key={index} 
+                 className={`flex flex-col items-center space-y-1 ${
+                   index <= currentStep ? 'text-amfit-button' : 'text-gray-400'
+                 } min-w-0 flex-1`}
+               >
+                 <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center ${
+                   index <= currentStep ? 'bg-amfit-button text-white' : 'bg-gray-200'
+                 }`}>
+                   <StepIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                 </div>
+                 <span className="text-center text-xs sm:text-sm leading-tight px-1 break-words">
+                   {step.title}
+                 </span>
+               </div>
+             );
+           })}
+         </div>
       </div>
 
       {/* Step Content */}

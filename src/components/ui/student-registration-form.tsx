@@ -35,6 +35,7 @@ export const StudentRegistrationForm = ({ onStudentRegistered, onCancel }: Stude
     objective: ''
   });
   const [birthdate, setBirthdate] = useState<Date>();
+  const [yearInput, setYearInput] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,18 +70,19 @@ export const StudentRegistrationForm = ({ onStudentRegistered, onCancel }: Stude
         throw new Error('Código do personal não encontrado');
       }
 
-      // Criar novo documento do aluno
-      const studentData = {
-        ...formData,
-        birthdate: birthdate,
-        userType: 'TRAINEE',
-        trainerCode: trainerCode,
-        trainerId: user.uid,
-        workoutConfigured: false,
-        assessmentConfigured: false,
-        createdAt: new Date(),
-        isTemporary: true // Flag para indicar que é um cadastro temporário para avaliação
-      };
+        // Criar novo documento do aluno
+        const studentData = {
+          ...formData,
+          birthdate: birthdate,
+          goal: formData.objective, // Manter compatibilidade
+          userType: 'TRAINEE',
+          trainerCode: trainerCode,
+          trainerId: user.uid,
+          workoutConfigured: false,
+          assessmentConfigured: false,
+          createdAt: new Date(),
+          isTemporary: true // Flag para indicar que é um cadastro temporário para avaliação
+        };
 
       const docRef = await addDoc(collection(db, 'users'), studentData);
       
@@ -105,6 +107,14 @@ export const StudentRegistrationForm = ({ onStudentRegistered, onCancel }: Stude
     'Preparação esportiva'
   ];
 
+  const handleYearChange = () => {
+    const year = parseInt(yearInput);
+    if (year >= 1900 && year <= new Date().getFullYear()) {
+      const newDate = new Date(year, birthdate?.getMonth() || 0, birthdate?.getDate() || 1);
+      setBirthdate(newDate);
+    }
+  };
+
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
@@ -125,30 +135,49 @@ export const StudentRegistrationForm = ({ onStudentRegistered, onCancel }: Stude
 
           <div className="space-y-2">
             <Label>Data de Nascimento *</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !birthdate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {birthdate ? format(birthdate, "PPP", { locale: ptBR }) : "Selecione a data"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={birthdate}
-                  onSelect={setBirthdate}
-                  disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                  initialFocus
-                  className="pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Label className="text-xs text-gray-500">Ano</Label>
+                  <Input
+                    type="number"
+                    value={yearInput}
+                    onChange={(e) => setYearInput(e.target.value)}
+                    onBlur={handleYearChange}
+                    placeholder="Ex: 1990"
+                    min={1900}
+                    max={new Date().getFullYear()}
+                  />
+                </div>
+                <div className="flex-2">
+                  <Label className="text-xs text-gray-500">Dia e Mês</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !birthdate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {birthdate ? format(birthdate, "dd/MM/yyyy", { locale: ptBR }) : "Selecione a data"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={birthdate}
+                        onSelect={setBirthdate}
+                        disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2">
