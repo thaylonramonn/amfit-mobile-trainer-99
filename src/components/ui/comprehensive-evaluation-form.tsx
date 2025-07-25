@@ -124,14 +124,14 @@ export const ComprehensiveEvaluationForm = ({ onSubmit, onCancel }: Comprehensiv
   });
 
   const steps = [
-    { title: 'Aluno', icon: User },
-    { title: 'Anamnese', icon: FileText },
-    { title: 'Objetivos', icon: FileText },
-    { title: 'PAR-Q', icon: FileText },
-    { title: 'Medidas', icon: Calculator },
-    { title: 'Perímetros', icon: Calculator },
-    { title: 'Dobras/Bio', icon: Calculator },
-    { title: 'Finalizar', icon: FileText }
+    { title: 'Aluno', shortTitle: 'Al', icon: User },
+    { title: 'Anamnese', shortTitle: 'An', icon: FileText },
+    { title: 'Objetivos', shortTitle: 'Obj', icon: FileText },
+    { title: 'PAR-Q', shortTitle: 'PQ', icon: FileText },
+    { title: 'Medidas', shortTitle: 'Med', icon: Calculator },
+    { title: 'Perímetros', shortTitle: 'Per', icon: Calculator },
+    { title: 'Dobras/Bio', shortTitle: 'DB', icon: Calculator },
+    { title: 'Finalizar', shortTitle: 'Fin', icon: FileText }
   ];
 
   const updateFormData = (field: string, value: any) => {
@@ -860,23 +860,34 @@ export const ComprehensiveEvaluationForm = ({ onSubmit, onCancel }: Comprehensiv
         <Progress value={((currentStep + 1) / steps.length) * 100} className="h-2" />
         
          {/* Steps Navigation */}
-         <div className="flex items-center justify-between mt-4 text-xs">
+         <div className="flex items-center justify-between mt-4 overflow-x-auto pb-2">
            {steps.map((step, index) => {
              const StepIcon = step.icon;
+             const isActive = index <= currentStep;
+             const isCurrent = index === currentStep;
              return (
                <div 
                  key={index} 
-                 className={`flex flex-col items-center space-y-1 ${
-                   index <= currentStep ? 'text-amfit-button' : 'text-gray-400'
-                 } min-w-0 flex-1`}
+                 className={`flex flex-col items-center space-y-1 min-w-0 flex-shrink-0 mx-1 ${
+                   isActive ? 'text-amfit-button' : 'text-gray-400'
+                 }`}
+                 style={{ minWidth: '60px' }}
                >
-                 <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center ${
-                   index <= currentStep ? 'bg-amfit-button text-white' : 'bg-gray-200'
-                 }`}>
+                 <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all ${
+                   isActive 
+                     ? 'bg-amfit-button text-white shadow-lg' 
+                     : 'bg-gray-200 text-gray-500'
+                 } ${isCurrent ? 'ring-2 ring-amfit-button ring-offset-2' : ''}`}>
                    <StepIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                  </div>
-                 <span className="text-center text-xs sm:text-sm leading-tight px-1 break-words">
-                   {step.title}
+                 <span 
+                   className={`text-center leading-tight transition-all ${
+                     window.innerWidth < 640 ? 'text-xs' : 'text-sm'
+                   }`}
+                   title={step.title}
+                 >
+                   <span className="hidden sm:inline">{step.title}</span>
+                   <span className="sm:hidden">{step.shortTitle}</span>
                  </span>
                </div>
              );
